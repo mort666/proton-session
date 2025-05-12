@@ -6,7 +6,7 @@ require (
 	github.com/ProtonMail/go-proton-api v0.4.0
 	github.com/ProtonMail/gopenpgp/v2 v2.8.3
 	github.com/adrg/xdg v0.5.3
-	github.com/miteshbsjat/textfilekv v1.1.1
+	github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba
 	github.com/rs/zerolog v1.34.0
 )
 

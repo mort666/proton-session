@@ -8,7 +8,6 @@
  * @Last Modified time: 2025-5-12 23:12:55
  */
 
-
 package protonsession
 
 import (
@@ -23,31 +22,41 @@ import (
 type FileStore struct {
 	accountName string
 	fileName    string
+	CacheDir    bool
 }
 
 // Implements basic file based key value store session DB, this is not a secure storage method, the stored information is
-// stored within the filesystem of the user's home directory in a cleartext file. This is more for demonstration and if a secure 
+// stored within the filesystem of the user's home directory in a cleartext file. This is more for demonstration and if a secure
 // store is required it is recommended a more robust implementation is used.
 
 func NewFileStore(filename string, account string) *FileStore {
 	return &FileStore{
 		fileName:    filename,
 		accountName: account,
+		CacheDir:    true,
 	}
 }
 
 func (fs *FileStore) Load() (*SessionConfig, error) {
-	sessionCachePath, err := xdg.CacheFile(fs.fileName)
-	if err != nil {
-		return nil, err
-	}
-	if sessionCachePath == "" {
-		return nil, nil
+	var sessionCachePath string
+	var kvs *tkv.KeyValueStore
+	var err error
+
+	if fs.CacheDir {
+		sessionCachePath, err = xdg.CacheFile(fs.fileName)
+		if err != nil {
+			return nil, err
+		}
+		if sessionCachePath == "" {
+			return nil, nil
+		}
+	} else {
+		sessionCachePath = fs.fileName
 	}
 
 	log.Debug().Msgf("FileStore.Load() - sessionCachePath %s", sessionCachePath)
 
-	kvs, err := tkv.NewKeyValueStore(sessionCachePath)
+	kvs, err = tkv.NewKeyValueStore(sessionCachePath)
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +66,6 @@ func (fs *FileStore) Load() (*SessionConfig, error) {
 		return nil, ErrKeyNotFound
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	if val == "" {
 		return nil, nil
 	}
@@ -74,14 +80,19 @@ func (fs *FileStore) Load() (*SessionConfig, error) {
 }
 
 func (fs *FileStore) Save(session *SessionConfig) error {
+	var sessionCachePath string
+
 	data, err := json.Marshal(session)
 	if err != nil {
 		return err
 	}
-
-	sessionCachePath, err := xdg.CacheFile(fs.fileName)
-	if err != nil {
-		return err
+	if fs.CacheDir {
+		sessionCachePath, err = xdg.CacheFile(fs.fileName)
+		if err != nil {
+			return err
+		}
+	} else {
+		sessionCachePath = fs.fileName
 	}
 
 	kvs, err := tkv.NewKeyValueStore(sessionCachePath)
@@ -98,9 +109,16 @@ func (fs *FileStore) Save(session *SessionConfig) error {
 }
 
 func (fs *FileStore) Delete() error {
-	sessionCachePath, err := xdg.CacheFile(fs.fileName)
-	if err != nil {
-		return err
+	var sessionCachePath string
+	var err error
+
+	if fs.CacheDir {
+		sessionCachePath, err = xdg.CacheFile(fs.fileName)
+		if err != nil {
+			return err
+		}
+	} else {
+		sessionCachePath = fs.fileName
 	}
 
 	kvs, err := tkv.NewKeyValueStore(sessionCachePath)
@@ -112,9 +130,16 @@ func (fs *FileStore) Delete() error {
 }
 
 func (fs *FileStore) List() ([]string, error) {
-	sessionCachePath, err := xdg.CacheFile(fs.fileName)
-	if err != nil {
-		return nil, err
+	var sessionCachePath string
+	var err error
+
+	if fs.CacheDir {
+		sessionCachePath, err = xdg.CacheFile(fs.fileName)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		sessionCachePath = fs.fileName
 	}
 
 	kvs, err := tkv.NewKeyValueStore(sessionCachePath)

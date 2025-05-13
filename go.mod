@@ -7,7 +7,6 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.8.3
 	github.com/adrg/xdg v0.5.3
 	github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba
-	github.com/rs/zerolog v1.34.0
 )
 
 require (
@@ -26,7 +25,6 @@ require (
 	github.com/emersion/go-vcard v0.0.0-20220507122617-d4056df0ec4a // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

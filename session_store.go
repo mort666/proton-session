@@ -16,7 +16,6 @@ import (
 
 	"github.com/adrg/xdg"
 	tkv "github.com/miteshbsjat/textfilekv"
-	"github.com/rs/zerolog/log"
 )
 
 type FileStore struct {
@@ -53,8 +52,6 @@ func (fs *FileStore) Load() (*SessionConfig, error) {
 	} else {
 		sessionCachePath = fs.fileName
 	}
-
-	log.Debug().Msgf("FileStore.Load() - sessionCachePath %s", sessionCachePath)
 
 	kvs, err = tkv.NewKeyValueStore(sessionCachePath)
 	if err != nil {

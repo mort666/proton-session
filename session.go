@@ -15,7 +15,6 @@ import (
 
 	"github.com/ProtonMail/go-proton-api"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/rs/zerolog/log"
 )
 
 type SessionOptions struct {
@@ -53,14 +52,10 @@ func SessionFromCredentials(ctx context.Context, options []proton.Option, creds 
 	var session Session
 	session.MaxWorkers = 10
 
-	log.Debug().Msg("session.refresh client")
-
 	session.manager = proton.New(options...)
 
-	log.Debug().Msgf("session.config\n\tuid %s - access_token %s - refresh_token %s", creds.UID, creds.AccessToken, creds.RefreshToken)
 	session.Client = session.manager.NewClient(creds.UID, creds.AccessToken, creds.RefreshToken)
 
-	log.Debug().Msg("session.GetUser")
 	session.user, err = session.Client.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -84,17 +79,13 @@ func SessionFromRefresh(ctx context.Context, options []proton.Option, creds *Ses
 	var session Session
 	session.MaxWorkers = 10
 
-	log.Debug().Msg("session.refresh client")
-
 	session.manager = proton.New(options...)
 
-	log.Debug().Msgf("session.config\n\tuid %s - access_token %s - refresh_token %s", creds.UID, creds.AccessToken, creds.RefreshToken)
 	session.Client, session.Auth, err = session.manager.NewClientWithRefresh(ctx, creds.UID, creds.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debug().Msg("session.GetUser")
 	session.user, err = session.Client.GetUser(ctx)
 	if err != nil {
 		return nil, err
@@ -109,7 +100,7 @@ func SessionFromLogin(ctx context.Context, options []proton.Option, username str
 	session := &Session{}
 	session.MaxWorkers = 10
 	session.manager = proton.New(options...)
-	log.Debug().Msgf("session.login\n\rusername %s - password %s", username, "<hidden>")
+
 	session.Client, session.Auth, err = session.manager.NewClientWithLogin(ctx, username, []byte(password))
 	if err != nil {
 		return nil, err

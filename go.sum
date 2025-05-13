@@ -36,6 +36,8 @@ github.com/go-resty/resty/v2 v2.16.5/go.mod h1:hkJtXbA2iKHzJheXYvQ8snQES5ZLGKMwQ
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/miteshbsjat/textfilekv v1.1.1 h1:MPv+mDS479dGaaydNQrURK35hg6CWSuBEKoxhYjWZ4Y=
 github.com/miteshbsjat/textfilekv v1.1.1/go.mod h1:1UnyP8127ohnKlvpKawjMx/vECvSHtCz8MQVttbtv0k=
+github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba h1:fPudQTGdlloVpeqsQPBimjg8giYfQ2i19AflDhqVZCQ=
+github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba/go.mod h1:1UnyP8127ohnKlvpKawjMx/vECvSHtCz8MQVttbtv0k=
 github.com/mort666/go-proton-api v0.4.9 h1:vkzF3PjigKDW3B/ttLH7T5rN5kaVrrxeqEeGH1SV4Hw=
 github.com/mort666/go-proton-api v0.4.9/go.mod h1:6iy3zXisXEV5qKQ5I3MzQXaJDoKYxV5SpD+lGqF2ypI=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

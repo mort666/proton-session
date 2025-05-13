@@ -63,8 +63,6 @@ github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovk
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
 github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/miteshbsjat/textfilekv v1.1.1 h1:MPv+mDS479dGaaydNQrURK35hg6CWSuBEKoxhYjWZ4Y=
-github.com/miteshbsjat/textfilekv v1.1.1/go.mod h1:1UnyP8127ohnKlvpKawjMx/vECvSHtCz8MQVttbtv0k=
 github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba h1:fPudQTGdlloVpeqsQPBimjg8giYfQ2i19AflDhqVZCQ=
 github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba/go.mod h1:1UnyP8127ohnKlvpKawjMx/vECvSHtCz8MQVttbtv0k=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=

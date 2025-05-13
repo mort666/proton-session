@@ -60,10 +60,6 @@ func SessionFromCredentials(ctx context.Context, options []proton.Option, creds 
 	log.Debug().Msgf("session.config\n\tuid %s - access_token %s - refresh_token %s", creds.UID, creds.AccessToken, creds.RefreshToken)
 	session.Client = session.manager.NewClient(creds.UID, creds.AccessToken, creds.RefreshToken)
 
-	// All API operations must be run within a context.
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	log.Debug().Msg("session.GetUser")
 	session.user, err = session.Client.GetUser(ctx)
 	if err != nil {
@@ -72,7 +68,6 @@ func SessionFromCredentials(ctx context.Context, options []proton.Option, creds 
 
 	return &session, nil
 }
-
 
 // Create Session using the provided AuthToken and RefreshToken, returns a populated session object
 func SessionFromRefresh(ctx context.Context, options []proton.Option, creds *SessionCredentials) (*Session, error) {

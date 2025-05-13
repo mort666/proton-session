@@ -13,7 +13,7 @@ package protonsession
 import (
 	"context"
 
-	p "github.com/ProtonMail/go-proton-api"
+	p "github.com/mort666/go-proton-api"
 )
 
 type Manager p.Manager

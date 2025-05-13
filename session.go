@@ -13,8 +13,8 @@ package protonsession
 import (
 	"context"
 
-	"github.com/ProtonMail/go-proton-api"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/mort666/go-proton-api"
 )
 
 type SessionOptions struct {

@@ -1,24 +1,24 @@
-module rtlabs.cloud/protonsession
+module rtlabs.tech/protonsession
 
-go 1.24.3
+go 1.26
 
 require (
-	github.com/ProtonMail/gopenpgp/v2 v2.8.3
+	github.com/ProtonMail/gopenpgp/v2 v2.9.0
 	github.com/adrg/xdg v0.5.3
-	github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba
+	github.com/miteshbsjat/textfilekv v1.1.1
 	github.com/mort666/go-proton-api v0.4.9
 )
 
 require (
-	github.com/ProtonMail/bcrypt v0.0.0-20211005172633-e235017c1baf // indirect
+	github.com/ProtonMail/bcrypt v0.0.0-20210511135022-227b4adcab57 // indirect
 	github.com/ProtonMail/gluon v0.17.0 // indirect
-	github.com/ProtonMail/go-crypto v1.2.0 // indirect
+	github.com/ProtonMail/go-crypto v1.3.0 // indirect
 	github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f // indirect
 	github.com/ProtonMail/go-srp v0.0.7 // indirect
 	github.com/PuerkitoBio/goquery v1.10.3 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/bradenaw/juniper v0.15.3 // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.0 // indirect
 	github.com/cronokirby/saferith v0.33.0 // indirect
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff // indirect
 	github.com/go-resty/resty/v2 v2.16.5 // indirect

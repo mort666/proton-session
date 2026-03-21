@@ -5,8 +5,8 @@ go 1.26
 require (
 	github.com/ProtonMail/gopenpgp/v2 v2.10.0
 	github.com/adrg/xdg v0.5.3
-	github.com/miteshbsjat/textfilekv v1.1.2-0.20250126134530-a415693fb0ba
-	github.com/mort666/go-proton-api v0.4.9
+	github.com/miteshbsjat/textfilekv v1.1.1
+	github.com/mort666/go-proton-api v0.4.10
 )
 
 require (
@@ -22,6 +22,7 @@ require (
 	github.com/cronokirby/saferith v0.33.0 // indirect
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff // indirect
 	github.com/go-resty/resty/v2 v2.17.2 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	gitlab.com/c0b/go-ordered-json v0.0.0-20201030195603-febf46534d5a // indirect

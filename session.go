@@ -14,7 +14,8 @@ import (
 	"context"
 
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/mort666/go-proton-api"
+
+	"rtlabs.tech/protonsession/pkg/proton"
 )
 
 type SessionOptions struct {

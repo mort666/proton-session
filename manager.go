@@ -13,7 +13,7 @@ package protonsession
 import (
 	"context"
 
-	p "github.com/mort666/go-proton-api"
+	p "rtlabs.tech/protonsession/pkg/proton"
 )
 
 type Manager p.Manager

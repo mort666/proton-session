@@ -16,7 +16,6 @@ import (
 	crand "crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -26,6 +25,8 @@ import (
 	"strings"
 
 	"github.com/ProtonMail/go-srp"
+
+	"rtlabs.tech/protonsession/pkg/errors"
 )
 
 const DefaultWebClientAppVer = "web-account@5.0.407.0" // Setting this here incase version needs updating
@@ -191,7 +192,7 @@ func (c *WebApiClient) Authenticate(ctx context.Context, email, password string,
 
 	authCookie, err = c.Auth(ctx, unauthCookie, email, srpSessionHex, proofs)
 	if err != nil {
-		return Cookie{}, fmt.Errorf("authentifying: %w", err)
+		return Cookie{}, errors.ErrErrorAuthenticating(err)
 	}
 
 	return authCookie, nil
@@ -581,7 +582,7 @@ func (c *WebApiClient) Auth(ctx context.Context, unauthCookie Cookie,
 		}
 	}
 
-	return Cookie{}, fmt.Errorf("auth cookie not found in HTTP headers %s", httpHeadersToString(response.Header))
+	return Cookie{}, errors.ErrErrorMissingAuthCookie(httpHeadersToString(response.Header))
 }
 
 // generateLettersDigits mimicing Proton's own random string generator:
@@ -636,8 +637,7 @@ func buildError(httpCode int, body []byte) error {
 		details = append(details, fmt.Sprintf("%s: %s", key, value))
 	}
 
-	return fmt.Errorf("HTTP status code not OK: %s: %s (code %d with details: %s)",
-		prettyCode, *protonError.Error, *protonError.Code, strings.Join(details, ", "))
+	return errors.ErrErrorHTTPSatusNotOK(prettyCode, *protonError.Error, *protonError.Code, strings.Join(details, ", "))
 }
 
 func (c *WebApiClient) Do(ctx context.Context, cookie Cookie, url string) (
@@ -684,7 +684,6 @@ func Contains(slice []string, item string) bool {
 	return false
 }
 
-var ErrUnsupportedOption = errors.New("unsupported option")
 
 const (
 	SupportedOptionRetries              = "retries"

@@ -16,6 +16,7 @@ import (
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 
 	"rtlabs.tech/protonsession/pkg/proton"
+	"rtlabs.tech/protonsession/pkg/webclient"
 )
 
 type SessionOptions struct {
@@ -23,14 +24,21 @@ type SessionOptions struct {
 }
 
 type Session struct {
-	Client  *proton.Client
-	Auth    proton.Auth
-	manager *proton.Manager
+	Client       *proton.Client
+	Auth         proton.Auth
+	manager      *proton.Manager
+	MaxWorkers   int
+	user         proton.User
+	UserKeyRing  *crypto.KeyRing
+	webAPIClient *webclient.WebApiClient
+	username     string
+	password     string
+	email        string
+	Ctx          context.Context
+}
 
-	MaxWorkers int
-
-	user        proton.User
-	UserKeyRing *crypto.KeyRing
+func (s *Session) WebAPIClient() *webclient.WebApiClient {
+	return s.webAPIClient
 }
 
 // Create Session from provided Session credentials. Returns a populated session object
@@ -108,4 +116,22 @@ func SessionFromLogin(ctx context.Context, options []proton.Option, username str
 	}
 
 	return session, nil
+}
+
+// Create Session using provided Login Information, returns pointer to session object
+func SessionFromWebLogin(ctx context.Context, username string, password string, opts ...webclient.WebClientOption) (*Session, error) {
+	var err error
+
+	webAPIClient, err := webclient.NewWebAPIClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Session{
+		Ctx:          ctx,
+		username:     username,
+		password:     password,
+		webAPIClient: webAPIClient,
+		MaxWorkers:   10,
+	}, nil
 }

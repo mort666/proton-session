@@ -7,3 +7,12 @@ func Filter[S ~[]E, E any](s S, keep func(E) bool) S {
 		return !keep(e)
 	})
 }
+
+func Contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}

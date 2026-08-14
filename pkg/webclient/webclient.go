@@ -41,18 +41,17 @@ func WithHttpClient(client *http.Client) WebClientOption {
 }
 
 // WithAppVersion allows providing an alternative appVersion
-func WithAppVersion(appVersion string, params map[string]string) WebClientOption {
+func WithAppVersion(appVersion string) WebClientOption {
 	return func(opts *WebApiClient, supportedOptions ...string) error {
-		opts.AppVersion	= appVersion
+		opts.AppVersion = appVersion
 		return nil
 	}
 }
 
-
 // WithUserAgent allows providing an alternative UserAgent
-func WithUserAgent(appVersion string, params map[string]string) WebClientOption {
+func WithUserAgent(appVersion string) WebClientOption {
 	return func(opts *WebApiClient, supportedOptions ...string) error {
-		opts.AppVersion	= appVersion
+		opts.AppVersion = appVersion
 		return nil
 	}
 }
@@ -684,8 +683,6 @@ func Contains(slice []string, item string) bool {
 	}
 	return false
 }
-
-
 
 var ErrUnsupportedOption = errors.New("unsupported option")
 

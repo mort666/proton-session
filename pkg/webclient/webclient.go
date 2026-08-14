@@ -49,9 +49,9 @@ func WithAppVersion(appVersion string) WebClientOption {
 }
 
 // WithUserAgent allows providing an alternative UserAgent
-func WithUserAgent(appVersion string) WebClientOption {
+func WithUserAgent(useragent string) WebClientOption {
 	return func(opts *WebApiClient, supportedOptions ...string) error {
-		opts.AppVersion = appVersion
+		opts.UserAgent = useragent
 		return nil
 	}
 }

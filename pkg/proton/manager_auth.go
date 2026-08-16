@@ -8,6 +8,7 @@ import (
 	"github.com/ProtonMail/go-srp"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/go-resty/resty/v2"
+	"rtlabs.tech/protonsession/pkg/errors"
 )
 
 func (m *Manager) NewClient(uid, acc, ref string) *Client {
@@ -62,7 +63,7 @@ func (m *Manager) NewClientWithLoginWithHVToken(ctx context.Context, username st
 
 	if m.verifyProofs {
 		if !bytes.Equal(serverProof, proofs.ExpectedServerProof) {
-			return nil, Auth{}, ErrInvalidProof
+			return nil, Auth{}, errors.ErrInvalidProof
 		}
 	}
 
@@ -156,3 +157,4 @@ type APIHVDetails struct {
 	Methods []string `json:"HumanVerificationMethods"`
 	Token   string   `json:"HumanVerificationToken"`
 }
+

@@ -2,12 +2,10 @@ package proton
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-)
 
-var ErrInvalidProof = errors.New("unexpected server proof")
-var ErrAPIErrIsNotHVErr = errors.New("not HV error")
+	"rtlabs.tech/protonsession/pkg/errors"
+)
 
 type ErrDetails []byte
 
@@ -82,10 +80,9 @@ func (d *ErrDetails) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-
 func (err APIError) GetHVDetails() (*APIHVDetails, error) {
 	if !err.IsHVError() {
-		return nil, ErrAPIErrIsNotHVErr
+		return nil, errors.ErrAPIErrIsNotHVErr
 	}
 
 	r := new(APIHVDetails)

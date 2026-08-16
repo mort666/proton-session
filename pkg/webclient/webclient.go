@@ -23,13 +23,20 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/ProtonMail/go-srp"
+	"github.com/rs/zerolog"
 
 	"rtlabs.tech/protonsession/pkg/errors"
+	"rtlabs.tech/protonsession/pkg/proton"
 )
 
 const DefaultWebClientAppVer = "web-account@5.0.407.0" // Setting this here incase version needs updating
+
+// DefaultHVInputTimeout is the default period [WebApiClient.WaitForEnter] will
+// wait for the user to press ENTER on the console before giving up.
+const DefaultHVInputTimeout = 2 * time.Minute
 
 type WebClientOption func(*WebApiClient, ...string) error
 
@@ -65,6 +72,25 @@ func WithBaseURL(baseurl string) WebClientOption {
 	}
 }
 
+// WithBaseURL allows overriding the API URL.
+func WithLogger(logger *zerolog.Logger) WebClientOption {
+	return func(opts *WebApiClient, supportedOptions ...string) error {
+		opts.Logger = logger
+		return nil
+	}
+}
+
+// WithHVInputTimeout allows overriding how long [WebApiClient.WaitForEnter]
+// waits for the user to press ENTER before returning
+// [errors.ErrHVInputTimeoutError]. A value of zero or less falls back to
+// [DefaultHVInputTimeout].
+func WithHVInputTimeout(timeout time.Duration) WebClientOption {
+	return func(opts *WebApiClient, supportedOptions ...string) error {
+		opts.HVInputTimeout = timeout
+		return nil
+	}
+}
+
 func randomUserAgent() string {
 	var seed [32]byte
 	_, _ = crand.Read(seed[:])
@@ -94,12 +120,18 @@ func randomUserAgent() string {
 // WebApiClient is a minimal Proton v4 API client which can handle all the
 // oddities of Proton's authentication flow they want to keep hidden
 // from the public.
+// HVInputTimeout is how long [WebApiClient.WaitForEnter] waits for the user
+// to press ENTER on the console before returning
+// [errors.ErrHVInputTimeoutError]. Defaults to [DefaultHVInputTimeout].
 type WebApiClient struct {
-	ApiURLBase string
-	HttpClient *http.Client
-	AppVersion string
-	UserAgent  string
-	generator  *rand.ChaCha8
+	ApiURLBase     string
+	HttpClient     *http.Client
+	AppVersion     string
+	UserAgent      string
+	Logger         *zerolog.Logger
+	HVInputTimeout time.Duration
+	generator      *rand.ChaCha8
+	HVDetails      *errors.APIHVDetails
 }
 
 // newWebApiClient returns an [WebApiClient] with sane defaults matching Proton's
@@ -110,11 +142,12 @@ func NewWebAPIClient(ctx context.Context, opts ...WebClientOption) (client *WebA
 	generator := rand.NewChaCha8(seed)
 
 	apiclient := &WebApiClient{
-		ApiURLBase: "https://account.proton.me/api",
-		HttpClient: http.DefaultClient,
-		AppVersion: DefaultWebClientAppVer,
-		UserAgent:  randomUserAgent(),
-		generator:  generator,
+		ApiURLBase:     "https://account.proton.me/api",
+		HttpClient:     http.DefaultClient,
+		AppVersion:     DefaultWebClientAppVer,
+		UserAgent:      randomUserAgent(),
+		HVInputTimeout: DefaultHVInputTimeout,
+		generator:      generator,
 	}
 
 	for _, opt := range opts {
@@ -134,6 +167,15 @@ func (c *WebApiClient) SetHeaders(request *http.Request, cookie Cookie) {
 	request.Header.Set("x-pm-appversion", c.AppVersion)
 	request.Header.Set("x-pm-locale", "en_US")
 	request.Header.Set("x-pm-uid", cookie.uid)
+	request.Header.Set("priority", "u=1, i")
+	request.Header.Set("referer", "https://account.proton.me/u/0/vpn/WireGuard")
+	request.Header.Set("sec-ch-ua", "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Brave\";v=\"146\"")
+	request.Header.Set("sec-ch-ua-mobile", "?0")
+	request.Header.Set("sec-ch-ua-platform", "\"Linux\"")
+	request.Header.Set("sec-fetch-dest", "empty")
+	request.Header.Set("sec-fetch-mode", "cors")
+	request.Header.Set("sec-fetch-site", "same-origin")
+	request.Header.Set("sec-gpc", "1")
 }
 
 // SetUserAgent sets the useragent to the user provided value
@@ -176,23 +218,41 @@ func (c *WebApiClient) Authenticate(ctx context.Context, email, password string,
 		return Cookie{}, fmt.Errorf("getting auth information: %w", err)
 	}
 
+	c.Logger.Debug().Msgf("username: %s,\n\tmoduluspgp: %s,\n\tserverEphemeral: %s,\n\tsalt: %s,\n\tsrpSession: %s\n\tversion: %d", username, modulusPGPClearSigned, serverEphemeralBase64, saltBase64, srpSessionHex, version)
+
 	// Prepare SRP proof generator using Proton's official SRP parameters and hashing.
 	srpAuth, err := srp.NewAuth(version, username, []byte(password),
 		saltBase64, modulusPGPClearSigned, serverEphemeralBase64)
 	if err != nil {
-		return Cookie{}, fmt.Errorf("initializing SRP auth: %w", err)
+		return Cookie{}, errors.ErrErrorInitSRPAuth(err)
 	}
 
 	// Generate SRP proofs (A, M1) with the usual 2048-bit modulus.
 	const modulusBits = 2048
 	proofs, err := srpAuth.GenerateProofs(modulusBits)
 	if err != nil {
-		return Cookie{}, fmt.Errorf("generating SRP proofs: %w", err)
+		return Cookie{}, errors.ErrErrorGeneratingProofs(err)
 	}
 
-	authCookie, err = c.Auth(ctx, unauthCookie, email, srpSessionHex, proofs)
+	c.HVDetails = nil
+	authCookie, err = c.Auth(ctx, unauthCookie, email, srpSessionHex, proofs, nil)
 	if err != nil {
-		return Cookie{}, errors.ErrErrorAuthenticating(err)
+		if c.HVDetails != nil {
+			// Prompt for the human verification challenge and wait (with a
+			// timeout) for the user to confirm completion by pressing ENTER.
+			// A timeout here surfaces as errors.ErrHVInputTimeoutError so callers
+			// can tell "user never confirmed" apart from a genuine auth failure.
+			if promptErr := c.PromptHvURL(ctx, (*proton.APIHVDetails)(c.HVDetails)); promptErr != nil {
+				return Cookie{}, errors.ErrErrorAuthenticating(promptErr)
+			}
+
+			authCookie, err = c.Auth(ctx, unauthCookie, email, srpSessionHex, proofs, (*proton.APIHVDetails)(c.HVDetails))
+			if err != nil {
+				return Cookie{}, errors.ErrErrorAuthenticating(err)
+			}
+		} else {
+			return Cookie{}, err
+		}
 	}
 
 	return authCookie, nil
@@ -466,9 +526,7 @@ func (c *Cookie) String() string {
 // ErrServerProofNotValid indicates the M2 from the server didn't match the expected proof.
 
 // auth performs the SRP proof submission (and optionally TOTP) to obtain tokens.
-func (c *WebApiClient) Auth(ctx context.Context, unauthCookie Cookie,
-	username, srpSession string, proofs *srp.Proofs,
-) (authCookie Cookie, err error) {
+func (c *WebApiClient) Auth(ctx context.Context, unauthCookie Cookie, username, srpSession string, proofs *srp.Proofs, hvdetails *proton.APIHVDetails) (authCookie Cookie, err error) {
 	clientEphemeral := base64.StdEncoding.EncodeToString(proofs.ClientEphemeral)
 	clientProof := base64.StdEncoding.EncodeToString(proofs.ClientProof)
 
@@ -498,6 +556,9 @@ func (c *WebApiClient) Auth(ctx context.Context, unauthCookie Cookie,
 	}
 	c.SetHeaders(request, unauthCookie)
 	request.Header.Set("Content-Type", "application/json")
+	if hvdetails != nil {
+		c.AddHVToRequest(request, hvdetails)
+	}
 
 	response, err := c.HttpClient.Do(request)
 	if err != nil {
@@ -507,8 +568,18 @@ func (c *WebApiClient) Auth(ctx context.Context, unauthCookie Cookie,
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Cookie{}, fmt.Errorf("reading response body: %w", err)
+		return Cookie{}, errors.ErrErrorReadingResponseBody(err)
 	} else if response.StatusCode != http.StatusOK {
+		apiErr := errors.APIError{}
+
+		if err := json.Unmarshal(responseBody, &apiErr); err != nil {
+			return Cookie{}, errors.ErrErrorUnmarshalApiError(err, responseBody)
+		}
+		if apiErr.IsHVError() {
+			c.HVDetails, _ = apiErr.GetHVDetails()
+			return Cookie{}, errors.ErrHVRequiredError(apiErr)
+		}
+
 		return Cookie{}, buildError(response.StatusCode, responseBody)
 	}
 
@@ -683,7 +754,6 @@ func Contains(slice []string, item string) bool {
 	}
 	return false
 }
-
 
 const (
 	SupportedOptionRetries              = "retries"

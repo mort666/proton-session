@@ -1,3 +1,13 @@
+/**
+ * Copyright © 2020-2026 Stephen Kapp and Reaper Technologies Limited.
+ * All Rights Reserved.
+ *
+ * @Author: Stephen Kapp
+ * @Date: 2026-8-19 22:02:25
+ * @Last Modified by: Stephen Kapp
+ * @Last Modified time: 2026-8-19 22:02:25
+ */
+
 package proton
 
 import (
@@ -6,7 +16,6 @@ import (
 	"io"
 
 	"github.com/go-resty/resty/v2"
-
 )
 
 // parseResponse should be used as post-processing of response when request is

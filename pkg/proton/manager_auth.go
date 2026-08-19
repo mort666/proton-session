@@ -1,3 +1,13 @@
+/**
+ * Copyright © 2020-2026 Stephen Kapp and Reaper Technologies Limited.
+ * All Rights Reserved.
+ *
+ * @Author: Stephen Kapp
+ * @Date: 2026-8-19 22:01:46
+ * @Last Modified by: Stephen Kapp
+ * @Last Modified time: 2026-8-19 22:01:46
+ */
+
 package proton
 
 import (
@@ -8,6 +18,7 @@ import (
 	"github.com/ProtonMail/go-srp"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/go-resty/resty/v2"
+
 	"rtlabs.tech/protonsession/pkg/errors"
 )
 

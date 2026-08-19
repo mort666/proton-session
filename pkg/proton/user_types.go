@@ -1,3 +1,13 @@
+/**
+ * Copyright © 2020-2026 Stephen Kapp and Reaper Technologies Limited.
+ * All Rights Reserved.
+ *
+ * @Author: Stephen Kapp
+ * @Date: 2026-8-19 22:00:21
+ * @Last Modified by: Stephen Kapp
+ * @Last Modified time: 2026-8-19 22:00:21
+ */
+
 package proton
 
 type User struct {

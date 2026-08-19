@@ -36,10 +36,7 @@ var ErrAPIErrIsNotHVErr = errors.New("not HV error")
 var ErrErrorUnmarshalApiError = NewErrorf("error unmarshalling apierror response: %w\n\tbody: %s")
 var ErrHVRequiredError = NewErrorf("human verification required: %w")
 var ErrHVInputTimeoutError = errors.New("timeout while waiting for HV confirmation")
-
-
 var ErrUnsupportedOption = errors.New("unsupported option")
-
 
 type Errorf func(args ...interface{}) error
 
@@ -69,7 +66,6 @@ func AsType[E error](err error) (E, bool) {
 
 	return errors.AsType[E](err)
 }
-
 
 type ErrDetails []byte
 

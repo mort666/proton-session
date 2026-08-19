@@ -16,6 +16,29 @@ import (
 	"fmt"
 )
 
+type Code int
+
+// Response Codes returned from the ProtonAPI to indicate the outcome of the request
+const (
+	SuccessCode                 Code = 1000  // Request Successful
+	MultiCode                   Code = 1001  // MultiCode Response
+	InvalidValue                Code = 2001  // Request included an invalid value
+	AppVersionMissingCode       Code = 5001  // Request was missing the required AppVersion header
+	AppVersionBadCode           Code = 5003  // An invalid AppVersion header was provided
+	UsernameInvalid             Code = 6003  // Deprecated, but still used.
+	PasswordWrong               Code = 8002  // Provided User Password is invalid
+	HumanVerificationRequired   Code = 9001  // Request failure due to the requirement for human verification
+	PaidPlanRequired            Code = 10004 // Request action failed as the action requires the account have a Paid Subscription
+	AuthRefreshTokenInvalid     Code = 10013 // Provided Auth Refresh token was invalid
+	HumanValidationInvalidToken Code = 12087 // The Human Verification Token when used was invalid
+)
+
+// APIHVDetails contains information related to the human verification requests.
+type APIHVDetails struct {
+	Methods []string `json:"HumanVerificationMethods"`
+	Token   string   `json:"HumanVerificationToken"`
+}
+
 // ErrorMissingUID indicates that the user UID is missing from the session store
 var ErrorMissingUID = errors.New("missing UID")
 
@@ -61,8 +84,7 @@ var ErrErrorGeneratingProofs = NewErrorf("generating SRP proofs: %w")
 var ErrErrorInitSRPAuth = NewErrorf("initialising SRP auth: %w")
 
 // ErrAPIErrIsNotHVErr indicates that the returned API error when validated is not an actual
-//
-//	human verification error even though the API may have returned the 9001 status code
+// human verification error even though the API may have returned the 9001 status code
 var ErrAPIErrIsNotHVErr = errors.New("not HV error")
 
 // ErrErrorUnmarshalApiError indicates that the wrapped error and associate response body caused
@@ -81,7 +103,7 @@ var ErrUnsupportedOption = errors.New("unsupported option")
 type Errorf func(args ...interface{}) error
 
 // Provides a local wrapper for creation of New Errors that take a message that implements
-// format string based parameter inclusion and using the '%w' format string directive to Wrap
+// format string based parameter inclusion and allows using the '%w' format string directive to Wrap
 // a error provided as an arguement. Which can then be reused within the application as a function
 // call to return the error.
 func NewErrorf(message string) Errorf {
@@ -170,26 +192,4 @@ func (err APIError) GetHVDetails() (*APIHVDetails, error) {
 	}
 
 	return r, nil
-}
-
-type Code int
-
-const (
-	SuccessCode                 Code = 1000
-	MultiCode                   Code = 1001
-	InvalidValue                Code = 2001
-	AppVersionMissingCode       Code = 5001
-	AppVersionBadCode           Code = 5003
-	UsernameInvalid             Code = 6003 // Deprecated, but still used.
-	PasswordWrong               Code = 8002
-	HumanVerificationRequired   Code = 9001
-	PaidPlanRequired            Code = 10004
-	AuthRefreshTokenInvalid     Code = 10013
-	HumanValidationInvalidToken Code = 12087
-)
-
-// APIHVDetails contains information related to the human verification requests.
-type APIHVDetails struct {
-	Methods []string `json:"HumanVerificationMethods"`
-	Token   string   `json:"HumanVerificationToken"`
 }
